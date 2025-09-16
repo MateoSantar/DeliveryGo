@@ -10,6 +10,8 @@ namespace classes
         private double Monto { get; set; }
         private EstadoPedido Estado { get; set; }
 
+        public Pedido() { }
+
         public Pedido(int id, List<Item> items, String direccion, double monto, EstadoPedido estado)
         {
             Id = id;
