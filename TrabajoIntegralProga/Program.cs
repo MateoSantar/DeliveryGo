@@ -4,6 +4,6 @@ class Program
 {
     static void Main(string[] args)
     {
-        Console.WriteLine("Hello, World!");
+        ConfigManager.Instance.EnvioGratisDesde = 50000m;
     }
 }
