@@ -1,5 +1,5 @@
 using classes;
-using TrabajoIntegralProga.classes.Core.Order;
+using classes.Core.Order;
 
 namespace interfaces
 {

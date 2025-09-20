@@ -14,7 +14,7 @@ namespace classes.Core.Payment
 
         public bool Procesar(decimal monto)
         {
-            Console.WriteLine($"Monto a pagar con tarjeta: {monto}");
+            Console.WriteLine($"[Tarjeta] Monto a pagar: {monto}");
             return true;
         }
     }

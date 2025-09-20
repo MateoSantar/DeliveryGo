@@ -4,16 +4,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using enums;
 namespace classes.Core.Payment
 {
     class Aplicacion
     {
         private readonly IPago pago;
 
-        public Aplicacion (IPagoFactory factory)
+        public Aplicacion (IPagoFactory factory, PagoNombre tipo)
         {
-            pago = factory.Create(pago);
+            this.pago = factory.Create(tipo);
         }
 
         public void Run()

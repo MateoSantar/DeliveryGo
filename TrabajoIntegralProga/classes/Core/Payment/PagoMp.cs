@@ -14,7 +14,7 @@ namespace classes.Core.Payment
 
         public bool Procesar(decimal monto)
         {
-            Console.WriteLine($"Monto a pagar con MercadoPago: {monto}");
+            Console.WriteLine($"[Mercado Pago] Monto a pagar: {monto}");
             return true;
         }
     }
