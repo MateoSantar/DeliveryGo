@@ -5,21 +5,28 @@ namespace classes.Core.Order
 {
     public class Pedido
     {
-        private int Id { get; set; }
-        private List<Item> Items { get; set; }
-        private string Direccion { get; set; }
-        private double Monto { get; set; }
-        private EstadoPedido Estado { get; set; }
+        public int Id { get; set; }
+        public List<Item> Items { get; set; }
+        public string Direccion { get; set; }
+        public string TipoPago { get; set; }
+        public decimal Monto { get; set; }
+        public EstadoPedido Estado { get; set; }
 
         public Pedido() { }
 
-        public Pedido(int id, List<Item> items, string direccion, double monto, EstadoPedido estado)
+        public Pedido(int id, List<Item> items, string direccion, decimal monto, EstadoPedido estado, string tipoPago)
         {
             Id = id;
             Items = items;
             Direccion = direccion;
             Monto = monto;
             Estado = estado;
+            TipoPago = tipoPago;
+        }
+
+        public override string ToString()
+        {
+            return $"Pedido ID: {Id}, Items: {string.Join(", ", Items)}, Dirección: {Direccion}, Monto: {Monto}, Estado: {Estado}, Tipo de Pago: {TipoPago}";
         }
     }
 }
