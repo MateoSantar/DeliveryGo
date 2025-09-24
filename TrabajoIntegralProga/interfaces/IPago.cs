@@ -1,8 +1,10 @@
+using enums;
+
 namespace interfaces
 {
     public interface IPago
     {
-        string Nombre { get; }
+        PagoNombre Nombre { get; }
         bool Procesar(decimal monto);
     }
 }
