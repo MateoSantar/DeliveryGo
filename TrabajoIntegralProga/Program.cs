@@ -1,4 +1,4 @@
-
+﻿
 namespace TrabajoIntegralProga;
 using classes;
 using global::classes.Core.Strategy;
@@ -6,9 +6,6 @@ using interfaces;
 using classes.Core.Payment;
 using enums;
 using interfaces;
-
-namespace TrabajoIntegralProga;
-
 class Program
 {
     static void Main(string[] args)
