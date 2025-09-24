@@ -11,13 +11,14 @@ namespace classes.Core.Facade
 {
     public class CheckoutFacade
     {
-        public CheckoutFacade(ICarritoPort carrito, IEnvioStrategy envio, PedidoService pedidos)
+        private IEnvioStrategy _envioActual;
+        public CheckoutFacade(ICarritoPort carrito, IEnvioStrategy envioInicial, PedidoService pedidos)
         {
-
+            this._envioActual = envioInicial;   
         }
-
         public void AgregarItem(string sku, string nombre, decimal precio, int cantidad)
         {
+                
         }
         public void CambiarCantidad(string sku, int cantidad)
         {
