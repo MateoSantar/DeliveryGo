@@ -1,4 +1,5 @@
 using classes;
+using classes.Core.Order;
 
 namespace interfaces
 {
@@ -7,6 +8,7 @@ namespace interfaces
         IPedidoBuilder ConItems(List<Item> items);
         IPedidoBuilder ConDireccion(string direccion);
         IPedidoBuilder ConMetodoPago(string tipoPago);
+        IPedidoBuilder ConMonto(decimal monto);
         Pedido Build();
     }
 }

@@ -1,12 +1,11 @@
-﻿using classes;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using enums;
 
-namespace TrabajoIntegralProga.classes
+namespace classes.Core.Observer
 {
     public class PedidoService
     {
