@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using classes;
 
 public class Carrito
 {
@@ -24,7 +26,7 @@ public class Carrito
 
     public bool SetCantidad(string sku, int nueva)
     {
-        if (_items.ContainsKey(sku))
+        if (_items.ContainsKey(sku) && nueva > 0)
         {
             _items[sku].Cantidad = nueva;
             return true;
@@ -32,11 +34,22 @@ public class Carrito
         return false;
     }
 
+    public bool TryGetCantidad(string sku, out int cantidad)
+    {
+        if (_items.TryGetValue(sku, out var item))
+        {
+            cantidad = item.Cantidad;
+            return true;
+        }
+        cantidad = 0;
+        return false;
+    }
+
     public decimal Subtotal()
     {
         decimal total = 0;
         foreach (var item in _items.Values)
-            total += item.Precio * item.Cantidad;
+            total += (decimal)item.Precio * item.Cantidad;
         return total;
     }
 }

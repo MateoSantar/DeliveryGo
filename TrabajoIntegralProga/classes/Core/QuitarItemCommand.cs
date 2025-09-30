@@ -1,5 +1,7 @@
 ﻿using System;
-using Interfaces;
+using interfaces;
+using classes;
+
 public class QuitarItemCommand : ICommand
 {
     private readonly Carrito _carrito;
@@ -13,9 +15,10 @@ public class QuitarItemCommand : ICommand
     }
 
     public void Execute() => _backup = _carrito.Quitar(_sku);
+
     public void Undo()
     {
-        if (_backup != null) _carrito.Agregar(_backup);
+        if (_backup != null)
+            _carrito.Agregar(_backup);
     }
-
 }

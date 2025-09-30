@@ -1,5 +1,5 @@
 ﻿using System;
-using Interfaces;
+using interfaces;
 
 public class SetCantidadCommand : ICommand
 {
@@ -17,9 +17,16 @@ public class SetCantidadCommand : ICommand
 
     public void Execute()
     {
-        if (_carrito.SetCantidad(_sku, _nueva))
-            _anterior = _nueva; 
+        if (_carrito.TryGetCantidad(_sku, out var prev))
+        {
+            _anterior = prev;
+            _carrito.SetCantidad(_sku, _nueva);
+        }
     }
 
-    public void Undo() => _carrito.SetCantidad(_sku, _anterior);
+    public void Undo()
+    {
+        if (_anterior > 0)
+            _carrito.SetCantidad(_sku, _anterior);
+    }
 }

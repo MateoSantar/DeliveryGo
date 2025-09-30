@@ -1,14 +1,14 @@
 ﻿using System;
-using Interfaces; 
+using interfaces;
+using classes;
 
 public class CarritoPort
 {
-    private readonly Carrito _carrito = new();
+    public Carrito CarritoRef { get; } = new();
     private readonly EditorCarrito _editor = new();
 
-    public decimal Subtotal() => _carrito.Subtotal();
+    public decimal Subtotal() => CarritoRef.Subtotal();
     public void Run(ICommand cmd) => _editor.Run(cmd);
     public void Undo() => _editor.Undo();
     public void Redo() => _editor.Redo();
 }
-
