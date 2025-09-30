@@ -1,6 +1,6 @@
 using enums;
 
-namespace classes
+namespace classes.Core.Observer
 {
     public class PedidoChangedEventArgs : EventArgs
     {
