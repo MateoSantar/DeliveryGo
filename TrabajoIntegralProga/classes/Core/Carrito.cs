@@ -52,4 +52,14 @@ public class Carrito
             total += (decimal)item.Precio * item.Cantidad;
         return total;
     }
+
+    public List<Item> GetItems()
+    {
+        List<Item> items = new List<Item> ();
+        foreach (KeyValuePair<string,Item> item in _items)
+        {
+            items.Add(item.Value);
+        }
+        return items;
+    }
 }
