@@ -1,4 +1,5 @@
 # DeliveryGo
+
 Mini-ecommerce en consola desarrollado en C# como trabajo integral de Patrones de Diseño para la materia Programación II.
 
 ## Desarrolladores 
@@ -56,8 +57,18 @@ Un cliente desea comprar productos y elegir un método de envío y pago dentro d
 6. **Resultado**  
    El usuario recibe un resumen completo de su compra, incluyendo detalle de productos, costos de envío, método de pago seleccionado y estado actual del pedido.
 
+## UML
+
+![](https://github.com/MateoSantar/DeliveryGo/blob/main/DeliveryGoUML.png)
 
 ## Futuras implementaciones
 
 * Diseño de una UI mediante Forms
-* Implementación de persistencia mediante JSON o base de datos
+* Implementación de persistencia mediante JSON o base de datos\
+
+
+## Notas finales
+
+Este trabajo fue, sin duda, todo un desafío en cuanto al trabajo colaborativo y a la aplicación de conocimientos teóricos, como los patrones utilizados.
+A pesar de las dificultades, se logró llevar a cabo gracias al manejo de distintas ramas y al uso de *Pull Requests* revisadas por [Santarsiero Mateo](https://github.com/MateoSantar), lo que permitió una adecuada designación de roles dentro del equipo.
+
