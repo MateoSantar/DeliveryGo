@@ -56,3 +56,8 @@ Un cliente desea comprar productos y elegir un método de envío y pago dentro d
 6. **Resultado**  
    El usuario recibe un resumen completo de su compra, incluyendo detalle de productos, costos de envío, método de pago seleccionado y estado actual del pedido.
 
+
+## Futuras implementaciones
+
+* Diseño de una UI mediante Forms
+* Implementación de persistencia mediante JSON o base de datos
