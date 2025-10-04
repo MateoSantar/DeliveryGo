@@ -1,12 +1,13 @@
 ﻿
-    using classes;
-    using classes.Core.Strategy;
-    using classes.Core.Payment;
-    using classes.Core.Observer;
-    using classes.Core.Order;
-    using interfaces;
-    using enums;
+using classes;
+using classes.Core.Strategy;
+using classes.Core.Payment;
+using classes.Core.Observer;
+using classes.Core.Order;
+using interfaces;
+using enums;
 using System;
+using classes.Core.Facade;
 
 namespace DeliveryGo
 {
@@ -18,7 +19,10 @@ namespace DeliveryGo
         private static IPagoFactory? pagoFactory;
         private static PedidoService? pedidoService;
         private static LogisticaObserver? logisticaObserver;
+        private static ClienteObserver? clienteObserver;
+        private static AditoriaObserver? aditoriaObserver;
         private static bool logisticaSuscrita = false;
+        private static CheckoutFacade facade;
 
         public static void Main()
         {
@@ -28,7 +32,9 @@ namespace DeliveryGo
             pagoFactory = new PagoFactory();
             pedidoService = new PedidoService();
             logisticaObserver = new LogisticaObserver();
-
+            clienteObserver = new ClienteObserver();
+            aditoriaObserver = new AditoriaObserver();
+            facade = new CheckoutFacade(port, new EnvioMoto(), pedidoService);
             // Configuración inicial
             ConfigManager.Instance.EnvioGratisDesde = 50000m;
 
@@ -126,8 +132,8 @@ namespace DeliveryGo
             Console.WriteLine("|  9. Confirmar pedido                   |");
             Console.WriteLine("==========================================");
             Console.WriteLine("|  CONFIGURACIÓN                         |");
-            Console.WriteLine($"|  10. Logística: {(logisticaSuscrita ? "[SUSCRITA]" : "[NO SUSCRITA]"),-19}|");
-            Console.WriteLine("| 0. Salir                              |");
+            Console.WriteLine($"|  10. Logística: {(logisticaSuscrita ? "[SUSCRITA]" : "[NO SUSCRITA]"),-19}    |");
+            Console.WriteLine(" | 0. Salir                              |");
             Console.WriteLine("===========================================");
             Console.Write("\nSeleccione una opción: ");
         }
@@ -136,85 +142,40 @@ namespace DeliveryGo
         {
             Console.WriteLine("─── AGREGAR ÍTEM ───");
 
-            Console.Write("SKU del producto: ");
-            string sku = Console.ReadLine() ?? "";
+            string sku = PedirString("SKU del producto: ");
+            string nombre = PedirString("Nombre del producto: ");
+            decimal precio = PedirDecimal("Precio unitario: $");
+            int cantidad = PedirInt("Cantidad: ");
 
-            if (string.IsNullOrWhiteSpace(sku))
-            {
-                Console.WriteLine(" El SKU no puede estar vacío.");
-                return;
-            }
-
-            Console.Write("Nombre del producto: ");
-            string nombre = Console.ReadLine() ?? "";
-
-            if (string.IsNullOrWhiteSpace(nombre))
-            {
-                Console.WriteLine(" El nombre no puede estar vacío.");
-                return;
-            }
-
-            Console.Write("Precio unitario: $");
-            if (!decimal.TryParse(Console.ReadLine(), out decimal precio) || precio <= 0)
-            {
-                Console.WriteLine(" Precio inválido.");
-                return;
-            }
-
-            Console.Write("Cantidad: ");
-            if (!int.TryParse(Console.ReadLine(), out int cantidad) || cantidad <= 0)
-            {
-                Console.WriteLine(" Cantidad inválida.");
-                return;
-            }
-
-            var item = new Item(sku, nombre, precio, cantidad);
-            port!.Run(new AgregarItemCommand(port.CarritoRef, item));
+            facade.AgregarItem(sku, nombre, precio, cantidad);
 
             Console.WriteLine($"✓ Producto '{nombre}' agregado correctamente.");
             Console.WriteLine($"  Subtotal actual: ${port.Subtotal():N2}");
         }
-
         private static void CambiarCantidad()
         {
             Console.WriteLine("─── CAMBIAR CANTIDAD ───");
 
-            Console.Write("SKU del producto: ");
-            string sku = Console.ReadLine() ?? "";
+            string sku = PedirString("SKU del producto: ");
+            int cantidad = PedirInt("Nueva cantidad: ");
 
-            if (string.IsNullOrWhiteSpace(sku))
-            {
-                Console.WriteLine(" El SKU no puede estar vacío.");
-                return;
-            }
-
-            Console.Write("Nueva cantidad: ");
-            if (!int.TryParse(Console.ReadLine(), out int cantidad) || cantidad <= 0)
+            if (cantidad <= 0)
             {
                 Console.WriteLine("❌ Cantidad inválida.");
                 return;
             }
 
-            port!.Run(new SetCantidadCommand(port.CarritoRef, sku, cantidad));
-
+            facade.CambiarCantidad(sku, cantidad);
             Console.WriteLine($"✓ Cantidad actualizada correctamente.");
             Console.WriteLine($"  Subtotal actual: ${port.Subtotal():N2}");
         }
-
         private static void QuitarItem()
         {
             Console.WriteLine("─── QUITAR ÍTEM ───");
 
-            Console.Write("SKU del producto a quitar: ");
-            string sku = Console.ReadLine() ?? "";
+            string sku = PedirString("SKU del producto a quitar: ");
 
-            if (string.IsNullOrWhiteSpace(sku))
-            {
-                Console.WriteLine(" El SKU no puede estar vacío.");
-                return;
-            }
-
-            port!.Run(new QuitarItemCommand(port.CarritoRef, sku));
+            facade.QuitarItem(sku);
 
             Console.WriteLine($"✓ Producto quitado del carrito.");
             Console.WriteLine($"  Subtotal actual: ${port.Subtotal():N2}");
@@ -295,9 +256,9 @@ namespace DeliveryGo
             Console.WriteLine("1. Envío por Correo (Gratis desde $50.000)");
             Console.WriteLine("2. Envío en Moto ($1.200)");
             Console.WriteLine("3. Retiro en Tienda (Gratis)");
-            Console.Write("\nSeleccione método: ");
 
-            if (!int.TryParse(Console.ReadLine(), out int metodo) || metodo < 1 || metodo > 3)
+            int metodo = PedirInt("\nSeleccione método: ");
+            if (metodo < 1 || metodo > 3)
             {
                 Console.WriteLine(" Opción inválida.");
                 return;
@@ -311,12 +272,12 @@ namespace DeliveryGo
                 _ => new EnvioCorreo()
             };
 
-            envioService!.SetStrategy(estrategia);
+            facade.ElegirEnvio(estrategia);
 
             decimal subtotal = port!.Subtotal();
-            decimal costoEnvio = envioService.Calcular(subtotal);
+            decimal costoEnvio = estrategia.Calcular(subtotal);
 
-            Console.WriteLine($"\n✓ Método seleccionado: {envioService.NombreActual()}");
+            Console.WriteLine($"\n✓ Método seleccionado: {estrategia.Nombre}");
             Console.WriteLine($"  Costo de envío: ${costoEnvio:N2}");
 
             if (costoEnvio == 0 && subtotal >= ConfigManager.Instance.EnvioGratisDesde)
@@ -338,9 +299,9 @@ namespace DeliveryGo
             Console.WriteLine("1. Tarjeta");
             Console.WriteLine("2. Mercado Pago");
             Console.WriteLine("3. Transferencia");
-            Console.Write("\nSeleccione método de pago: ");
 
-            if (!int.TryParse(Console.ReadLine(), out int metodoPago) || metodoPago < 1 || metodoPago > 3)
+            int metodoPago = PedirInt("\nSeleccione método de pago: ");
+            if (metodoPago < 1 || metodoPago > 3)
             {
                 Console.WriteLine(" Opción inválida.");
                 return;
@@ -354,27 +315,23 @@ namespace DeliveryGo
                 _ => PagoNombre.tarjeta
             };
 
-            Console.Write("\n¿Aplicar IVA (21%)? (S/N): ");
-            bool aplicarIVA = Console.ReadLine()?.ToUpper() == "S";
-
-            Console.Write("¿Tiene cupón de descuento? (S/N): ");
-            bool tieneCupon = Console.ReadLine()?.ToUpper() == "S";
-
+            bool aplicarIVA = PedirSiNo("\n¿Aplicar IVA (21%)? (S/N): ");
+            bool tieneCupon = PedirSiNo("¿Tiene cupón de descuento? (S/N): ");
+            
             decimal porcentajeDescuento = 0;
             if (tieneCupon)
             {
-                Console.Write("Porcentaje de descuento (ej: 10 para 10%): ");
-                if (decimal.TryParse(Console.ReadLine(), out decimal desc) && desc > 0 && desc <= 100)
+                porcentajeDescuento = PedirDecimal("Porcentaje de descuento (ej: 10 para 10%): ") / 100m;
+                if (porcentajeDescuento <= 0 || porcentajeDescuento > 1)
                 {
-                    porcentajeDescuento = desc / 100m;
+                    porcentajeDescuento = 0;
                 }
             }
 
             decimal subtotal = port.Subtotal();
             decimal costoEnvio = envioService!.Calcular(subtotal);
             decimal total = subtotal + costoEnvio;
-
-            // Crear método de pago usando el Factory
+            
             IPago? pago = pagoFactory!.Create(tipoPago);
 
             if (pago == null)
@@ -383,7 +340,6 @@ namespace DeliveryGo
                 return;
             }
 
-            // Aplicar decoradores
             if (tieneCupon && porcentajeDescuento > 0)
             {
                 pago = new PagoConCupon(pago, porcentajeDescuento);
@@ -397,12 +353,11 @@ namespace DeliveryGo
             }
 
             Console.WriteLine($"\nMonto original: ${total:N2}");
-            Console.Write("Confirmar pago (S/N): ");
-            string confirmacion = Console.ReadLine()?.ToUpper() ?? "N";
+            bool confirmar = PedirSiNo("Confirmar pago (S/N): ");
 
-            if (confirmacion == "S")
+            if (confirmar)
             {
-                bool exito = pago.Procesar(total);
+                bool exito = facade.Pagar(tipoPago.ToString(), aplicarIVA, tieneCupon ? porcentajeDescuento : null);
 
                 if (exito)
                 {
@@ -439,54 +394,21 @@ namespace DeliveryGo
             Console.WriteLine($"TOTAL A PAGAR:   ${total:N2}");
             Console.WriteLine();
 
-            Console.Write("Dirección de envío: ");
-            string direccion = Console.ReadLine() ?? "";
+            string direccion = PedirString("Dirección de envío: ");
+            string tipoPago = PedirString("Tipo de pago utilizado: ");
+            bool confirmar = PedirSiNo("\n¿Confirmar pedido? (S/N): ");
 
-            if (string.IsNullOrWhiteSpace(direccion))
+            if (confirmar)
             {
-                Console.WriteLine(" La dirección no puede estar vacía.");
-                return;
-            }
-
-            Console.Write("\n¿Confirmar pedido? (S/N): ");
-            string confirmacion = Console.ReadLine()?.ToUpper() ?? "N";
-
-            if (confirmacion == "S")
-            {
-                // Crear pedido usando Builder
-                var builder = new PedidoBuilder();
-                var items = port.CarritoRef.GetItems().ToList();
-
-                var pedido = builder
-                    .ConItems(items)
-                    .ConDireccion(direccion)
-                    .ConMetodoPago(envioService.NombreActual())
-                    .ConMonto(total)
-                    .Build();
-
-                pedido.Id = new Random().Next(1000, 9999);
-                pedido.Estado = EstadoPedido.Recibido;
+                
+                Pedido pedido = facade.ConfirmarPedido(direccion,tipoPago);
 
                 Console.WriteLine($"\n✓ ¡Pedido #{pedido.Id} confirmado exitosamente!");
                 Console.WriteLine($"  Estado: {pedido.Estado}");
                 Console.WriteLine($"  Total: ${total:N2}");
                 Console.WriteLine($"  Dirección: {direccion}");
 
-                // Notificar cambio de estado usando Observer
-                pedidoService!.CambiarEstado(pedido.Id, EstadoPedido.Recibido);
-
-                // Simular progreso del pedido
-                Console.WriteLine("\nSimulando progreso del pedido...");
-                System.Threading.Thread.Sleep(1000);
-                pedidoService.CambiarEstado(pedido.Id, EstadoPedido.Preparando);
-
-                System.Threading.Thread.Sleep(1000);
-                pedidoService.CambiarEstado(pedido.Id, EstadoPedido.Enviado);
-
-                System.Threading.Thread.Sleep(1000);
-                pedidoService.CambiarEstado(pedido.Id, EstadoPedido.Entregado);
-
-                // Limpiar carrito después de confirmar
+                
                 var itemsToRemove = port.CarritoRef.GetItems().ToList();
                 foreach (var item in itemsToRemove)
                 {
@@ -505,9 +427,9 @@ namespace DeliveryGo
             Console.WriteLine($"\nEstado actual: Logística {(logisticaSuscrita ? "SUSCRITA" : "NO SUSCRITA")}");
             Console.WriteLine("\n1. Suscribir observador de logística");
             Console.WriteLine("2. Desuscribir observador de logística");
-            Console.Write("\nSeleccione opción: ");
 
-            if (!int.TryParse(Console.ReadLine(), out int opcion) || (opcion != 1 && opcion != 2))
+            int opcion = PedirInt("\nSeleccione opción: ");
+            if (opcion != 1 && opcion != 2)
             {
                 Console.WriteLine(" Opción inválida.");
                 return;
@@ -541,6 +463,62 @@ namespace DeliveryGo
                     Console.WriteLine("  Ya no recibirá notificaciones de cambios de estado.");
                 }
             }
+        }
+
+        private static string PedirString(string mensaje)
+        {
+            string? valor;
+            do
+            {
+                Console.Write(mensaje);
+                valor = Console.ReadLine();
+                if (!string.IsNullOrWhiteSpace(valor))
+                    break;
+                Console.WriteLine(" El valor no puede estar vacío.");
+            } while (true);
+            return valor ?? "";
+        }
+
+        private static int PedirInt(string mensaje)
+        {
+            int valor;
+            do
+            {
+                Console.Write(mensaje);
+                var entrada = Console.ReadLine();
+                if (int.TryParse(entrada, out valor))
+                    break;
+                Console.WriteLine($" Ingrese un número entero válido.");
+            } while (true);
+            return valor;
+        }
+
+        private static decimal PedirDecimal(string mensaje)
+        {
+            decimal valor;
+            do
+            {
+                Console.Write(mensaje);
+                var entrada = Console.ReadLine();
+                if (decimal.TryParse(entrada, out valor))
+                    break;
+                Console.WriteLine($" Ingrese un número decimal válido.");
+            } while (true);
+            return valor;
+        }
+
+        private static bool PedirSiNo(string mensaje)
+        {
+            string? entrada;
+            do
+            {
+                Console.Write(mensaje);
+                entrada = Console.ReadLine()?.Trim().ToUpper();
+                if (entrada == "S" || entrada == "N")
+                    break;
+                Console.WriteLine(" Ingrese 'S' para Sí o 'N' para No.");
+            } while (true);
+            return entrada == "S";
         }
     }
 }

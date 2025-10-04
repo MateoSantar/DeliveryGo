@@ -2,7 +2,7 @@
 using interfaces;
 using classes;
 
-public class CarritoPort
+public class CarritoPort : ICarritoPort
 {
     public Carrito CarritoRef { get; } = new();
     private readonly EditorCarrito _editor = new();

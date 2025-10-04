@@ -13,9 +13,9 @@ namespace classes.Core.Adapter
     {
         private readonly MpSdkFalsa _legacy;
 
-        public PagoAdapterMp()   
+        public PagoAdapterMp(MpSdkFalsa sdk)   
         {
-            _legacy = new MpSdkFalsa();
+            _legacy = sdk;
         }
 
         public PagoNombre Nombre => PagoNombre.mp;

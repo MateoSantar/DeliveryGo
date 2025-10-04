@@ -8,9 +8,9 @@ using enums;
 using classes.Core.Adapter;
 namespace classes.Core.Payment
 {
-    class PagoFactory : IPagoFactory
+    public class PagoFactory : IPagoFactory
     {
-        IPago? IPagoFactory.Create(enums.PagoNombre tipo)
+        IPago IPagoFactory.Create(PagoNombre tipo)
         {
             switch (tipo)
             {
@@ -19,7 +19,7 @@ namespace classes.Core.Payment
                 case enums.PagoNombre.transf:
                     return new PagoTransfer();
                 case enums.PagoNombre.mp:
-                    return new PagoAdapterMp();
+                    return new PagoAdapterMp(new MpSdkFalsa());
                 default:
                     Console.WriteLine("Hubo un error en Factory");
                     break;
