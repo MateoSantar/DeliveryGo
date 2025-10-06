@@ -39,7 +39,7 @@ Un cliente desea comprar productos y elegir un método de envío y pago dentro d
    - El **Carrito** mantiene el estado de los productos seleccionados.
 
 3. **Elegir método de envío**  
-   - El usuario selecciona entre diferentes estrategias de envío (por ejemplo: *Envío Express* o *Envío Estándar*).  
+   - El usuario selecciona entre diferentes estrategias de envío (por ejemplo: *Envío Por Correo* o *Retiro en tienda*).  
    - Se aplica el patrón **Strategy** para calcular costos y tiempos de entrega según el tipo de envío.  
    - El sistema utiliza un **Singleton** para centralizar la configuración y mantener una única instancia del gestor de envíos.
 
